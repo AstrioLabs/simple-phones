@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: black;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "📱";
+            margin-right: 10px;
+            font-size: 32px;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 25px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.15);
+        }
+
+        /* Carousel Container */
+        .carousel-container {
+            max-width: 1600px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .carousel-title {
+            text-align: center;
+            color: black;
+            font-size: 42px;
+            margin-bottom: 50px;
+            font-weight: bold;
+        }
+
+        .carousel-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 650px;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        .carousel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .phone-card {
+            position: absolute;
+            width: 450px;
+            height: 600px;
+            background: white;
+            border-radius: 25px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #f0f0f0;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .phone-card.active {
+            transform: translateX(0) scale(1.1);
+            z-index: 3;
+            opacity: 1;
+        }
+
+        .phone-card.prev {
+            transform: translateX(-550px) scale(0.85);
+            z-index: 2;
+            opacity: 0.6;
+        }
+
+        .phone-card.next {
+            transform: translateX(550px) scale(0.85);
+            z-index: 2;
+            opacity: 0.6;
+        }
+
+        .phone-card.hidden-left {
+            transform: translateX(-1100px) scale(0.6);
+            z-index: 1;
+            opacity: 0;
+        }
+
+        .phone-card.hidden-right {
+            transform: translateX(1100px) scale(0.6);
+            z-index: 1;
+            opacity: 0;
+        }
+
+        .phone-card:hover.active {
+            transform: translateX(0) scale(1.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .phone-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 2px solid black;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+            transition: all 0.3s;
+            color: black;
+            font-weight: bold;
+        }
+
+        .carousel-btn:hover {
+            background: black;
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-btn.prev {
+            left: 50px;
+        }
+
+        .carousel-btn.next {
+            right: 50px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 50px;
+            border-radius: 25px;
+            max-width: 650px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            border: 2px solid black;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content.success-mode {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        .modal-initial-content {
+            animation: slideIn 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-initial-content.hidden {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            color: black;
+            font-weight: bold;
+            z-index: 10;
+            transition: opacity 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #666;
+        }
+
+        .close-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modal-phone-image {
+            width: 350px;
+            height: 350px;
+            object-fit: contain;
+            margin: 0 auto 30px;
+        }
+
+        .storage-select {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid black;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            background: white;
+            color: black;
+            font-weight: 500;
+        }
+
+        .learn-more-btn {
+            background: black;
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: bold;
+        }
+
+        .learn-more-btn:hover {
+            transform: scale(1.05);
+            background: #333;
+        }
+
+        /* Success state */
+        .success-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 250;
+        }
+
+        .success-container.active {
+            display: block;
+            animation: successAppear 0.6s ease forwards;
+        }
+
+        @keyframes successAppear {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .checkmark {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #4CAF50;
+            box-shadow: 0 10px 40px rgba(76, 175, 80, 0.4);
+        }
+
+        .checkmark::before {
+            content: "✓";
+            font-size: 100px;
+            color: white;
+            font-weight: bold;
+            animation: checkmarkDraw 0.5s ease 0.3s forwards;
+            opacity: 0;
+        }
+
+        @keyframes checkmarkDraw {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 205;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Mobile Adaptation */
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+            }
+
+            .logo {
+                font-size: 22px;
+            }
+
+            .carousel-title {
+                font-size: 28px;
+            }
+
+            .phone-card {
+                width: 300px;
+                height: 450px;
+            }
+
+            .phone-card.prev {
+                transform: translateX(-350px) scale(0.8);
+            }
+
+            .phone-card.next {
+                transform: translateX(350px) scale(0.8);
+            }
+
+            .carousel-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+
+            .carousel-btn.prev {
+                left: 10px;
+            }
+
+            .carousel-btn.next {
+                right: 10px;
+            }
+
+            .modal-content {
+                padding: 35px 25px;
+            }
+
+            .modal-phone-image {
+                width: 250px;
+                height: 250px;
+            }
+
+            .checkmark {
+                width: 120px;
+                height: 120px;
+            }
+
+            .checkmark::before {
+                font-size: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">PhoneStore</div>
+        <div class="header-icons">
+            <button class="icon-btn" title="Account">👤</button>
+            <button class="icon-btn" title="Cart">🛒</button>
+        </div>
+    </header>
+
+    <!-- Carousel -->
+    <div class="carousel-container">
+        <h1 class="carousel-title">Choose Your Perfect Phone</h1>
+        <div class="carousel-wrapper">
+            <button class="carousel-btn prev" onclick="moveCarousel(-1)">❮</button>
+            <div class="carousel" id="carousel">
+                <!-- Cards will be generated here -->
+            </div>
+            <button class="carousel-btn next" onclick="moveCarousel(1)">❯</button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content" id="modalContent">
+            <button class="close-btn" id="closeBtn" onclick="closeModal()">×</button>
+
+            <!-- Initial content -->
+            <div class="modal-initial-content" id="modalInitialContent">
+                <img class="modal-phone-image" id="modalPhoneImage" src="" alt="Phone">
+                <select class="storage-select" id="storageSelect">
+                    <option value="64">64 GB</option>
+                    <option value="128">128 GB</option>
+                    <option value="256">256 GB</option>
+                    <option value="512">512 GB</option>
+                </select>
+                <button class="learn-more-btn" onclick="showSuccess()">Learn More</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success content (separate from modal) -->
+    <div class="success-container" id="successContainer">
+        <div class="checkmark"></div>
+    </div>
+
+    <script>
+        const phones = [
+            { image: 'images/15_blue.webp' },
+            { image: 'images/17_orange.png' },
+            { image: 'images/17_white.png' },
+            { image: 'images/16_pink.png' },
+            { image: 'images/16_black.png' }
+        ];
+
+        let currentIndex = 0;
+        let autoScrollInterval;
+        let isAnimating = false;
+
+        // Initialize carousel
+        function initCarousel() {
+            const carousel = document.getElementById('carousel');
+            carousel.innerHTML = phones.map((phone, index) => `
+                <div class="phone-card" data-index="${index}" onclick="openModal(${index})">
+                    <img class="phone-image" src="${phone.image}" alt="Phone">
+                </div>
+            `).join('');
+
+            updateCarousel();
+        }
+
+        // Update carousel positions
+        function updateCarousel() {
+            const cards = document.querySelectorAll('.phone-card');
+            const totalCards = cards.length;
+
+            cards.forEach((card, index) => {
+                card.classList.remove('active', 'prev', 'next', 'hidden-left', 'hidden-right');
+
+                let position = index - currentIndex;
+
+                if (position > totalCards / 2) {
+                    position -= totalCards;
+                } else if (position < -totalCards / 2) {
+                    position += totalCards;
+                }
+
+                if (position === 0) {
+                    card.classList.add('active');
+                } else if (position === -1) {
+                    card.classList.add('prev');
+                } else if (position === 1) {
+                    card.classList.add('next');
+                } else if (position < -1) {
+                    card.classList.add('hidden-left');
+                } else if (position > 1) {
+                    card.classList.add('hidden-right');
+                }
+            });
+        }
+
+        // Move carousel
+        function moveCarousel(direction) {
+            if (isAnimating) return;
+
+            isAnimating = true;
+            currentIndex = (currentIndex + direction + phones.length) % phones.length;
+            updateCarousel();
+
+            setTimeout(() => {
+                isAnimating = false;
+            }, 600);
+        }
+
+        // Auto scroll
+        function startAutoScroll() {
+            autoScrollInterval = setInterval(() => {
+                moveCarousel(1);
+            }, 3000);
+        }
+
+        function stopAutoScroll() {
+            clearInterval(autoScrollInterval);
+        }
+
+        // Open modal
+        function openModal(phoneIndex) {
+            stopAutoScroll();
+
+            // Reset modal state
+            document.getElementById('modalContent').classList.remove('success-mode');
+            document.getElementById('modalInitialContent').classList.remove('hidden');
+            document.getElementById('closeBtn').classList.remove('hidden');
+            document.getElementById('successContainer').classList.remove('active');
+
+            const phone = phones[phoneIndex];
+            const modal = document.getElementById('modal');
+            const modalPhoneImage = document.getElementById('modalPhoneImage');
+
+            modalPhoneImage.src = phone.image;
+            modalPhoneImage.alt = 'Phone';
+
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+
+            // Reset modal after animation
+            setTimeout(() => {
+                document.getElementById('modalContent').classList.remove('success-mode');
+                document.getElementById('modalInitialContent').classList.remove('hidden');
+                document.getElementById('closeBtn').classList.remove('hidden');
+                document.getElementById('successContainer').classList.remove('active');
+            }, 300);
+
+            startAutoScroll();
+        }
+
+        // Show success with confetti
+        function showSuccess() {
+            // Hide modal content (form disappears)
+            document.getElementById('modalInitialContent').classList.add('hidden');
+            document.getElementById('closeBtn').classList.add('hidden');
+
+            // Change modal appearance
+            setTimeout(() => {
+                document.getElementById('modalContent').classList.add('success-mode');
+            }, 300);
+
+            // Show confetti first
+            showConfetti();
+
+            // Show checkmark after short delay
+            setTimeout(() => {
+                document.getElementById('successContainer').classList.add('active');
+            }, 400);
+
+            // Auto close after 3 seconds
+            setTimeout(() => {
+                closeModal();
+            }, 3500);
+        }
+
+        // Confetti effect
+        function showConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff1493'];
+
+            for (let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = '-10px';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.3 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+
+                    // Random shapes
+                    if (Math.random() > 0.5) {
+                        confetti.style.borderRadius = '50%';
+                    }
+
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3500);
+                }, i * 20);
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+
+        // Touch support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.getElementById('carousel').addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.getElementById('carousel').addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                moveCarousel(1);
+            }
+            if (touchEndX > touchStartX + 50) {
+                moveCarousel(-1);
+            }
+        }
+
+        // Initialize
+        initCarousel();
+        startAutoScroll();
+    </script>
+</body>
+</html>
