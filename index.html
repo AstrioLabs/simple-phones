@@ -159,13 +159,7 @@ header{
   filter:drop-shadow(0 16px 28px rgba(0,0,0,.18));
   transition:transform .4s cubic-bezier(.34,1.4,.64,1);
 }
-.scene.pos-active .face-front:hover .phone-img{transform:translateY(-10px) scale(1.04)}
 
-
-
-/* Side hover nudge */
-.scene.pos-prev .face-front:hover{transform:translateX(10px)}
-.scene.pos-next .face-front:hover{transform:translateX(-10px)}
 
 /* Back face */
 .face-back{
@@ -186,9 +180,10 @@ header{
 .back-cta{
   margin-top:20px;background:var(--pc,#4f8ef7);color:#fff;
   border:none;border-radius:12px;padding:14px;
-  font-size:15px;font-weight:700;cursor:pointer;
+  font-size:22px;font-weight:700;cursor:pointer;
   transition:filter .2s,transform .2s;
   box-shadow:0 6px 18px color-mix(in srgb,var(--pc,#4f8ef7) 45%,transparent);
+  display:flex;align-items:center;justify-content:center;gap:8px;
 }
 .back-cta:hover{filter:brightness(1.12);transform:translateY(-2px)}
 
@@ -265,47 +260,15 @@ header{
   transform:scale(1.06);
   box-shadow:0 4px 14px color-mix(in srgb,var(--mc,#111) 40%,transparent);
 }
-.price{
-  font-size:38px;font-weight:900;letter-spacing:-1.5px;color:#111;
-  margin-bottom:22px;display:inline-block;
-  transition:transform .25s cubic-bezier(.34,1.4,.64,1),color .3s;
-}
-.price.bump{transform:scale(1.18);color:var(--mc,#111)}
-.buy-btn{
+.learn-btn{
   width:100%;background:var(--mc,#111);color:#fff;border:none;
   padding:17px;font-size:17px;font-weight:700;border-radius:14px;cursor:pointer;
-  letter-spacing:.3px;position:relative;overflow:hidden;
+  letter-spacing:.3px;
   box-shadow:0 6px 20px color-mix(in srgb,var(--mc,#111) 40%,transparent);
-  transition:transform .2s,box-shadow .2s,filter .2s;
+  transition:transform .2s,filter .2s;
 }
-.buy-btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
-.buy-btn:active{transform:scale(.98)}
-
-/* ── Success ── */
-.success-screen{
-  display:none;position:fixed;inset:0;
-  background:rgba(255,255,255,.94);backdrop-filter:blur(20px);
-  z-index:400;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-}
-.success-screen.open{display:flex;animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0}}
-.success-icon{
-  width:112px;height:112px;border-radius:50%;background:#22c55e;
-  display:flex;align-items:center;justify-content:center;
-  font-size:58px;color:#fff;
-  box-shadow:0 16px 50px rgba(34,197,94,.4);
-  animation:iconPop .55s cubic-bezier(.34,1.56,.64,1) .15s both;
-}
-@keyframes iconPop{from{transform:scale(0) rotate(-20deg);opacity:0}}
-.success-title{font-size:30px;font-weight:800;color:#111;animation:riseIn .5s cubic-bezier(.34,1.4,.64,1) .3s both}
-.success-sub{font-size:15px;color:rgba(0,0,0,.4);animation:riseIn .5s cubic-bezier(.34,1.4,.64,1) .42s both}
-@keyframes riseIn{from{opacity:0;transform:translateY(12px)}}
-.confetti{position:fixed;width:9px;height:9px;border-radius:2px;pointer-events:none;z-index:450;animation:cfall linear forwards}
-@keyframes cfall{
-  0%  {transform:translateY(-20px) rotate(0deg)   scaleX(1);  opacity:1}
-  50% {transform:translateY(50vh)  rotate(360deg) scaleX(.4); opacity:1}
-  100%{transform:translateY(110vh) rotate(720deg) scaleX(1);  opacity:0}
-}
+.learn-btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.learn-btn:active{transform:scale(.98)}
 
 @media(max-width:720px){
   .scene{width:260px;height:420px;margin-left:-130px;margin-top:-210px}
@@ -351,16 +314,8 @@ header{
     <div class="modal-name" id="mName"></div>
     <div class="modal-hint">Select storage</div>
     <div class="chips" id="chips"></div>
-    <div><div class="price" id="mPrice">$899</div></div><br>
-    <button class="buy-btn" id="buyBtn" onclick="addToCart()">Add to Cart →</button>
+    <button class="learn-btn" id="learnBtn" onclick="closeModal()">Learn More</button>
   </div>
-</div>
-
-<!-- Success -->
-<div class="success-screen" id="succ">
-  <div class="success-icon">✓</div>
-  <div class="success-title">Added to cart!</div>
-  <div class="success-sub" id="sSub"></div>
 </div>
 
 <script>
@@ -405,7 +360,7 @@ const phones = [
   },
 ];
 
-const storage=[{l:'64 GB',p:799},{l:'128 GB',p:899},{l:'256 GB',p:1099},{l:'512 GB',p:1299}];
+const storage=[{l:'64 GB'},{l:'128 GB'},{l:'256 GB'},{l:'512 GB'}];
 
 let cur=0, busy=false, timer, selStor=1, openPhone=0;
 
@@ -477,7 +432,7 @@ function init(){
           <img class="phone-img" src="${p.img}" alt="${p.name}">
 
         </div>
-        <div class="face face-back" onclick="openModal(${i})">
+        <div class="face face-back">
           <div class="back-logo">PhoneStore</div>
           <div class="back-name">${p.name}</div>
           <div class="back-sub">${p.sub}</div>
@@ -488,11 +443,9 @@ function init(){
                 <span class="spec-val">${s[1]}</span>
               </div>`).join('')}
           </div>
-          <button class="back-cta" style="--pc:${p.color}">Buy Now →</button>
+          <button class="back-cta" style="--pc:${p.color}" onclick="openModal(${i})">+</button>
         </div>
       </div>`;
-    sc.addEventListener('mousemove',tilt);
-    sc.addEventListener('mouseleave',untilt);
     track.appendChild(sc);
   });
   buildDots();
@@ -570,35 +523,19 @@ function faceClick(i){
 }
 
 /* ─────────────────────────────────────────────
-   3-D TILT  (magnetic cursor)
-───────────────────────────────────────────── */
-function tilt(e){
-  const sc=e.currentTarget;
-  if(!sc.classList.contains('pos-active'))return;
-  const card=sc.querySelector('.face-front');
-  const r=card.getBoundingClientRect();
-  const mx=(e.clientX-r.left)/r.width-.5;
-  const my=(e.clientY-r.top)/r.height-.5;
-  card.style.transform=`perspective(700px) rotateY(${mx*16}deg) rotateX(${-my*16}deg) scale(1.04)`;
-}
-function untilt(e){e.currentTarget.querySelector('.face-front').style.transform=''}
-
-/* ─────────────────────────────────────────────
    MODAL
 ───────────────────────────────────────────── */
 function openModal(i){
   clearInterval(timer);
-  // un-flip
   document.querySelectorAll('.scene').forEach(sc=>sc.classList.remove('flipped'));
   openPhone=i;
   const p=phones[i];
   document.getElementById('mImg').src=p.img;
   document.getElementById('mName').textContent=p.name+' '+p.sub;
   document.getElementById('modal').style.setProperty('--mc',p.color);
-  document.getElementById('buyBtn').style.setProperty('--mc',p.color);
+  document.getElementById('learnBtn').style.setProperty('--mc',p.color);
   selStor=1;
   buildChips(p.color);
-  refreshPrice(false);
   document.getElementById('modalBg').classList.add('open');
 }
 
@@ -611,53 +548,9 @@ function pickChip(i,el){
   selStor=i;
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
   el.classList.add('on');
-  refreshPrice(true);
-}
-function refreshPrice(animate){
-  const el=document.getElementById('mPrice');
-  if(animate){el.classList.add('bump');setTimeout(()=>el.classList.remove('bump'),280)}
-  el.textContent='$'+storage[selStor].p.toLocaleString();
 }
 function closeModal(){document.getElementById('modalBg').classList.remove('open');resetTimer()}
 function bgClose(e){if(e.target.id==='modalBg')closeModal()}
-
-/* ─────────────────────────────────────────────
-   SUCCESS + CONFETTI
-───────────────────────────────────────────── */
-function addToCart(){
-  const p=phones[openPhone];
-  closeModal();
-  document.getElementById('sSub').textContent=
-    p.name+' · '+p.sub+' · '+storage[selStor].l+' — $'+storage[selStor].p.toLocaleString();
-  document.getElementById('succ').classList.add('open');
-  burst(p.color);
-  setTimeout(()=>document.getElementById('succ').classList.remove('open'),3200);
-}
-
-function burst(base){
-  const lt=lighten(base);
-  const palette=[base,lt,'#ffffff','#f0f0f8','#ccccff'];
-  for(let i=0;i<160;i++){
-    setTimeout(()=>{
-      const el=document.createElement('div');
-      el.className='confetti';
-      el.style.cssText=[
-        `left:${Math.random()*100}%`,`top:-12px`,
-        `background:${palette[Math.floor(Math.random()*palette.length)]}`,
-        `animation-duration:${2.2+Math.random()*1.6}s`,
-        `animation-delay:${Math.random()*.38}s`,
-        `border-radius:${Math.random()>.5?'50%':'2px'}`,
-      ].join(';');
-      document.body.appendChild(el);
-      setTimeout(()=>el.remove(),4400);
-    },i*14);
-  }
-}
-function lighten(hex){
-  const n=parseInt(hex.replace('#',''),16);
-  const r=Math.min(255,(n>>16)+90),g=Math.min(255,((n>>8)&255)+90),b=Math.min(255,(n&255)+90);
-  return`rgb(${r},${g},${b})`;
-}
 
 /* ─────────────────────────────────────────────
    KEYBOARD + TOUCH
